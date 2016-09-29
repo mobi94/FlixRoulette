@@ -1,11 +1,7 @@
 package com.netflix.roulette.myclientserverapplication;
 
-import com.net.codeusa.NetflixRoulette;
-import com.net.codeusa.RouletteFunctions;
-
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
