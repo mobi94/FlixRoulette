@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="15dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="150dp"
+            android:src="@mipmap/ic_launcher"
+            android:id="@+id/poster"
+            android:adjustViewBounds="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="10dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/top_content"
+            android:orientation="vertical"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/poster"
+            android:layout_alignBottom="@+id/poster"
+            android:layout_marginTop="5dp">
+
+            <TextView
+                android:text="Release"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/release"
+                android:gravity="right|center_vertical"
+                android:layout_weight="1"
+                android:layout_marginBottom="5dp" />
+
+            <TextView
+                android:text="Rating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rating"
+                android:gravity="right|center_vertical"
+                android:layout_weight="1"
+                android:layout_marginBottom="5dp" />
+
+            <TextView
+                android:text="Director"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/director"
+                android:gravity="right|center_vertical"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+        <TextView
+            android:text="Summary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/poster"
+            android:id="@+id/summary" />
+
+    </RelativeLayout>
+
+</ScrollView>
