@@ -1,4 +1,4 @@
-package com.netflix.roulette.myclientserverapplication;
+package com.netflix.roulette.myclientserverapplication.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -15,14 +15,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.netflix.roulette.myclientserverapplication.pojo.Movie;
+import com.netflix.roulette.myclientserverapplication.adapters.MoviesListAdapter;
+import com.netflix.roulette.myclientserverapplication.R;
+import com.netflix.roulette.myclientserverapplication.activities.MainActivity;
+
 import org.json.JSONArray;
 import org.json.JSONException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SavedMoviesFragment extends Fragment {
 
     MoviesListAdapter adapter;
     RecyclerView recyclerView;
-    JSONArray jsonMoviesArray;
+    List<Movie> moviesArray;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -31,6 +41,7 @@ public class SavedMoviesFragment extends Fragment {
         ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
         if(actionBar != null) actionBar.setTitle("Saved movies");
 
+        moviesArray = new ArrayList<>();
         getSavedMovies();
         initializeRecyclerView(true);
         return rootView;
@@ -46,9 +57,9 @@ public class SavedMoviesFragment extends Fragment {
         }
     }
 
-    public void initializeRecyclerView(boolean isPortrait){
+    public void initializeRecyclerView(boolean isPortrait) {
         recyclerView.setHasFixedSize(true);
-        adapter = new MoviesListAdapter(getContext(), jsonMoviesArray, false);
+        adapter = new MoviesListAdapter(getContext(), moviesArray, false);
         recyclerView.setAdapter(adapter);
         if (isPortrait) {
             LinearLayoutManager layoutManager
@@ -59,12 +70,9 @@ public class SavedMoviesFragment extends Fragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
     }
 
-    public void getSavedMovies(){
+    public void getSavedMovies() {
         SharedPreferences sharedpreferences = getContext().getSharedPreferences(MainActivity.MY_PREFERENCES, Context.MODE_PRIVATE);
-        try {
-            jsonMoviesArray = new JSONArray(sharedpreferences.getString(MainActivity.PREFERENCES_DATA, "[]"));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        moviesArray = new Gson().fromJson(sharedpreferences.getString(MainActivity.PREFERENCES_DATA, "[]"),
+                new TypeToken<List<Movie>>(){}.getType());
     }
 }

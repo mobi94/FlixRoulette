@@ -1,14 +1,13 @@
-package com.netflix.roulette.myclientserverapplication;
+package com.netflix.roulette.myclientserverapplication.activities;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -17,6 +16,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.netflix.roulette.myclientserverapplication.R;
+import com.netflix.roulette.myclientserverapplication.fragments.SavedMoviesFragment;
+import com.netflix.roulette.myclientserverapplication.fragments.SearchFragment;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -41,21 +44,13 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "See my app \"Screen Off Widget\"", Snackbar.LENGTH_LONG)
-                        .setAction("Open", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-                                intent.setData(Uri.parse("https://play.google.com/store/apps/details?id=com.sergeystasyuk.screenoffwidget"));
-                                startActivity(intent);
-                            }
-                        })
-                        .show();
-            }
-        });
+        fab.setOnClickListener(view -> Snackbar.make(view, "See my app \"Screen Off Widget\"", Snackbar.LENGTH_LONG)
+                .setAction("Open", v -> {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse("https://play.google.com/store/apps/details?id=com.sergeystasyuk.screenoffwidget"));
+                    startActivity(intent);
+                })
+                .show());
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -111,9 +106,8 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         FragmentManager fragmentManager = getSupportFragmentManager();
 

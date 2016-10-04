@@ -1,4 +1,4 @@
-package com.netflix.roulette.myclientserverapplication;
+package com.netflix.roulette.myclientserverapplication.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -19,17 +19,24 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.netflix.roulette.myclientserverapplication.R;
+import com.netflix.roulette.myclientserverapplication.pojo.Movie;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DetailsModeActivity extends AppCompatActivity {
 
     MoviesListAdapter adapter;
     RecyclerView recyclerView;
-    JSONArray jsonMoviesArray;
+    List<Movie> moviesArray;
     int movieIndex, currentIndex;
     boolean shouldSave;
 
@@ -45,6 +52,7 @@ public class DetailsModeActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        moviesArray = new ArrayList<>();
         recyclerView = (RecyclerView) findViewById(R.id.detailed_movies_list);
 
         getData();
@@ -63,30 +71,7 @@ public class DetailsModeActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_save_movie) {
-            JSONArray savedJSONArray = new JSONArray();
-            boolean isIncluded = false;
-            SharedPreferences sharedpreferences = getSharedPreferences(MainActivity.MY_PREFERENCES, Context.MODE_PRIVATE);
-            try {
-                savedJSONArray = new JSONArray(sharedpreferences.getString(MainActivity.PREFERENCES_DATA, "[]"));
-                for (int i = 0; i <= savedJSONArray.length(); i++) {
-                    if (savedJSONArray.getJSONObject(i).getString("show_title").
-                            equals(jsonMoviesArray.getJSONObject(currentIndex).getString("show_title"))) {
-                        isIncluded = true;
-                        break;
-                    }
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }finally {
-                if (!isIncluded) {
-                    try {
-                        savedJSONArray.put(jsonMoviesArray.getJSONObject(currentIndex));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    sharedpreferences.edit().putString(MainActivity.PREFERENCES_DATA, savedJSONArray.toString()).apply();
-                }
-            }
+            saveCurrentMovie();
             return true;
         }
         else if(id == android.R.id.home){
@@ -97,17 +82,32 @@ public class DetailsModeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void saveCurrentMovie(){
+        boolean isIncluded = false;
+        SharedPreferences sharedpreferences = getSharedPreferences(MainActivity.MY_PREFERENCES, Context.MODE_PRIVATE);
+        List<Movie> savedMoviesArray = new Gson().fromJson(sharedpreferences.getString(MainActivity.PREFERENCES_DATA, "[]"),
+                new TypeToken<List<Movie>>(){}.getType());
+        for (int i = 0; i < savedMoviesArray.size(); i++) {
+            if (savedMoviesArray.get(i).getShowTitle().
+                    equals(moviesArray.get(currentIndex).getShowTitle())) {
+                isIncluded = true;
+                break;
+            }
+        }
+        if (!isIncluded) {
+            savedMoviesArray.add(moviesArray.get(currentIndex));
+            sharedpreferences.edit().putString(MainActivity.PREFERENCES_DATA, new Gson().toJson(savedMoviesArray)).apply();
+        }
+    }
+
     public void getData(){
         Intent intent = getIntent();
-        try {
-            jsonMoviesArray = new JSONArray(intent.getStringExtra(MainActivity.MOVIE_DATA));
-            ActionBar actionBar = getSupportActionBar();
-            movieIndex = intent.getIntExtra(MainActivity.MOVIE_INDEX, 0);
-            if (actionBar != null) actionBar.setTitle((String)jsonMoviesArray.getJSONObject(movieIndex).get("show_title"));
-            currentIndex = movieIndex;
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        moviesArray = new Gson().fromJson(intent
+                .getStringExtra(MainActivity.MOVIE_DATA), new TypeToken<List<Movie>>(){}.getType());
+        ActionBar actionBar = getSupportActionBar();
+        movieIndex = intent.getIntExtra(MainActivity.MOVIE_INDEX, 0);
+        if (actionBar != null) actionBar.setTitle(moviesArray.get(movieIndex).getShowTitle());
+        currentIndex = movieIndex;
         shouldSave = intent.getBooleanExtra(MainActivity.MOVIE_SAVE, false);
     }
 
@@ -134,14 +134,14 @@ public class DetailsModeActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return jsonMoviesArray.length();
+            return moviesArray.size();
         }
 
         @Override
-        public MoviesListAdapter.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
             LayoutInflater mInflater = LayoutInflater.from(parent.getContext());
             View view = mInflater.inflate(R.layout.detailed_activity_list_item, parent, false);
-            return new MoviesListAdapter.ViewHolder(view);
+            return new ViewHolder(view);
         }
 
         @Override
@@ -156,32 +156,22 @@ public class DetailsModeActivity extends AppCompatActivity {
             positionDetached = holder.getAdapterPosition();
             if(positionAttached != positionDetached) {
                 currentIndex = positionAttached;
-                String title = "";
-                try {
-                    title = (String) jsonMoviesArray.getJSONObject(positionAttached).get("show_title");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
                 ActionBar actionBar = getSupportActionBar();
-                if (actionBar != null) actionBar.setTitle(title);
+                if (actionBar != null) actionBar.setTitle(moviesArray.get(positionAttached).getShowTitle());
             }
         }
 
         @Override
-        public void onBindViewHolder(MoviesListAdapter.ViewHolder holder, int position) {
-            try {
-                JSONObject currentMovie = jsonMoviesArray.getJSONObject(position);
-                Picasso.with(context)
-                        .load((String) currentMovie.get("poster"))
-                        .error(R.mipmap.ic_launcher)
-                        .into(holder.poster);
-                holder.release.setText((String) currentMovie.get("release_year"));
-                holder.rating.setText((String) currentMovie.get("rating"));
-                holder.director.setText((String) currentMovie.get("director"));
-                holder.summary.setText((String) currentMovie.get("summary"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            Movie movie = moviesArray.get(position);
+            Picasso.with(context)
+                    .load(movie.getPoster())
+                    .error(R.mipmap.ic_launcher)
+                    .into(holder.poster);
+            holder.release.setText(movie.getReleaseYear());
+            holder.rating.setText(movie.getRating());
+            holder.director.setText(movie.getDirector());
+            holder.summary.setText(movie.getSummary());
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
